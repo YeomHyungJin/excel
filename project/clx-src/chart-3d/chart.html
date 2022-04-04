@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>3D-CHART</title>
+        <script src="../chart-3d/highcharts.js"></script>
+		<script src="../chart-3d/highcharts-3d.js"></script>
+		<!-- <script src="../chart-3d/exporting.js"></script> -->
+		<script src="../chart-3d/export-data.js"></script> 
+		<script src="../chart-3d/accessibility.js"></script>
+    </head>
+
+ 	<body>
+        <div id="container"></div>
+    	<script type="text/javascript">
+    	
+    	function sendData(arg){
+        	
+			////////////////////////////////////////////////////////////////////////////////////////////////
+        	var val1 = [];		// 차트의 x축에 해당하는 값
+    		var val2 = [];		// 차트의 y축에 해당하는 값 1
+    		var val3 = [];		// 차트의 y축에 해당하는 값 2	
+    		var val4 = [];		// 차트의 y축에 해당하는 값 3	
+    		
+    		// 화면에서 넘어온 arg(jsonArray)값을 배열로 변환
+    		for(var i = 0 ; i < arg.length ; i ++){
+    			
+    			/* val1.push(Object.values(arg[i])[0].substr(0,4)+'년'+Object.values(arg[i])[0].substr(4,2)+'월'); */
+    			val1.push(Object.values(arg[i])[0]);
+    			val2.push(parseInt(Object.values(arg[i])[1]));
+    			val3.push(parseInt(Object.values(arg[i])[2]));
+    			val4.push(parseInt(Object.values(arg[i])[3]));
+    		}
+    		////////////////////////////////////////////////////////////////////////////////////////////////
+    		
+    		// 차트에 넣을 series 값 생성
+			var jsonArrayChartData = new Array();	// 차트에 넣을 series 값(json값을 배열에 담은 변수)
+			var name = ['최대', '평균', 'Peak 평균'];
+			var color = ['#5EA2E2', '#3E4346', '#8BD97B'];			// 차트 색상 
+			
+			// for문 1부터 시작한 이유 : val1은 x축 해당하여 제외 그래서 val2부터 시작함.
+			for(var i = 1 ; i < Object.keys(arg[0]).length ; i ++){
+				
+				// 차트 데이터 생성
+				var jsonChartData = {};
+				jsonChartData.name = name[i-1];
+				jsonChartData.data = eval("val"+(i+1));
+				jsonChartData.stack = Object.keys(arg[0])[i];
+				jsonChartData.color = color[i-1];
+				jsonChartData.pointWidth = 13;
+				jsonArrayChartData.push(jsonChartData);
+			}
+    		////////////////////////////////////////////////////////////////////////////////////////////////
+	    	Highcharts.chart('container', {
+	    	    chart: {
+	    	        type: 'column',
+	    	        options3d: {
+	    	            enabled: true,
+	    	            /* alpha: 15, */
+	    	            alpha: 15,
+	    	            beta: 0,
+	    	            viewDistance: 25,
+	    	            depth: 50,
+	    	        },
+	    	        width: 1280,
+	    	        marginLeft : 70,
+	    	        backgroundColor: null
+	    	        
+	    	    },
+	
+	    	    title: {
+	    	        text: '월간 서버별 평균 MEMORY 사용현황'
+	    	    },
+	
+	    	    xAxis: {
+	    	        categories: val1,
+	    	        /* tickInterval: Math.round(arg.length/5), */	// x축 라벨 다 안보여줄 때
+	    	        labels: {
+	    	            skew3d: true,
+	    	            style: {
+	    	                fontSize: '13px',
+	    	            },
+	    	            overflow: 'allow'
+	    	        },
+	    	        width:1150
+	    	    },
+	
+	    	    yAxis: {
+	    	        allowDecimals: false,
+	    	        min: 0,
+	    	        title: {
+	    	            text: '',
+	    	            skew3d: true
+	    	        }
+	    	    },
+	    	    
+	    	    credits:{
+	    			enabled:false
+	    		},
+	
+	    	    tooltip: {
+	    	    	shared:true,	// 하나의 영역을 공유
+	    	    	headerFormat: '<b>{point.key}</b><br>',
+	    	        pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: {point.y}<br>'
+	    	    },
+	
+	    	    plotOptions: {
+	    	        column: {
+	    	            stacking: 'normal',
+	    	            depth: 40,
+	    	            pointWidth: 20
+	    	        }
+	    	    },
+	
+	    	    series: jsonArrayChartData
+	    	});
+    	}
+        </script>
+</body>
+</html>
